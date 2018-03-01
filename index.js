@@ -1,7 +1,8 @@
-const base64Img = require('base64-img');
+const image2base64 = require('image-to-base64');
 const fs = require('fs');
 const { Antigate } = require('antigate2');
 const { VK } = require('vk-io');
+const sleep = require('sleep');
 const config = require('./config');
 
 const triggersDir = './triggers/';
@@ -18,16 +19,24 @@ const vk = new VK({
 
 // Captcha handling
 vk.setCaptchaHandler(async ({ src }, retry) => {
-    const encodedImage = await base64Img.base64Sync(src);
+    console.log('Капча');
+    
+    const encodedImage = await image2base64(src)
+    .then((response) => {
+            return response;
+        }).catch((error) => {
+            console.log(error);
+        }
+    );
+           
     const key = await antigate.getByBase64(encodedImage);
-
     try {
         await retry(key);
-
+        
         console.log('Капча успешно решена');
     } catch (error) {
         console.log('Капча неверная');
-    }
+    }    
 });
 
 // Updates
@@ -60,15 +69,11 @@ updates.use(async (context, next) => {
     if (context.is('message') && context.isOutbox()) {
         return;
     }
-
-    // Seek commands from chat if set
-    if (config.CHAT_ID !== null && context.is('message') && context.payload.chat_id !== config.CHAT_ID) {
-        return;
-    }
     
-    if (context.is('message') && context.payload.user_id && replies[context.payload.user_id]) {
+    // Replies
+    if (context.is('message') && context.getUserId() && replies[context.getUserId()]) {
             let message = null;
-            const trigger = replies[context.payload.user_id];
+            const trigger = replies[context.getUserId()];
             
             switch (trigger.messages.type) {
                 case 1:
@@ -87,12 +92,16 @@ updates.use(async (context, next) => {
             
             if (trigger.messages.type > 0) {
                 const name = trigger.names[Math.floor(Math.random() * trigger.names.length)];
-                context.reply('@id' + trigger.id + ' (' + name + '), ' + message);
+            	await Promise.all([
+            		context.setActivity(),
+            		sleep.sleep(config.REPLIES_DELAY),
+            		context.reply('@id' + trigger.id + ' (' + name + '), ' + message)
+            	]);                
             }        
     }
 
     // Ignore some users
-    if (context.is('message') && config.IGNORE_LIST.indexOf(context.payload.user_id) >= 0) {
+    if (context.is('message') && config.IGNORE_LIST.indexOf(context.getUserId()) >= 0) {
         return;
     }
 
@@ -139,7 +148,7 @@ fs.readdir(triggersDir, (err, files) => {
                 
                 if (trigger.messages.type > 0) {
                     const name = trigger.names[Math.floor(Math.random() * trigger.names.length)];
-                    context.send('@id' + trigger.id + ' (' + name + '), ' + message);
+                    await context.send('@id' + trigger.id + ' (' + name + '), ' + message);
                 }
             });
         }
