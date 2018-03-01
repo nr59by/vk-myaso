@@ -72,9 +72,12 @@ updates.use(async (context, next) => {
     
     // Replies
     if (context.is('message') && context.getUserId() && replies[context.getUserId()]) {
-            let message = null;
-            const trigger = replies[context.getUserId()];
+        const trigger = replies[context.getUserId()];
             
+        console.log(Math.floor(Math.random() * trigger.messages.probability), trigger.messages.probability - 1);
+        
+        if (Math.floor(Math.random() * trigger.messages.probability) == trigger.messages.probability - 1) {
+            let message = null;
             switch (trigger.messages.type) {
                 case 1:
                     message = trigger.messages.list[Math.floor(Math.random() * trigger.messages.list.length)];
@@ -98,6 +101,7 @@ updates.use(async (context, next) => {
             		context.reply('@id' + trigger.id + ' (' + name + '), ' + message)
             	]);                
             }        
+        }
     }
 
     // Ignore some users
