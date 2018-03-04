@@ -117,6 +117,7 @@ updates.use(async (context, next) => {
 
 // Setup triggers
 let triggersCount = 0;
+let triggers = {};
 
 fs.readdir(triggersDir, (err, files) => {
     if (err) throw err;
@@ -126,6 +127,8 @@ fs.readdir(triggersDir, (err, files) => {
             triggersCount++;
             let contents = fs.readFileSync(triggersDir + file);
             let trigger = JSON.parse(contents);
+            
+            triggers[trigger.id] = trigger.triggers;
             
             updates.hear(trigger.triggers, async (context) => {
                 const photo = trigger.photos[Math.floor(Math.random() * trigger.photos.length)];
@@ -157,6 +160,16 @@ fs.readdir(triggersDir, (err, files) => {
     });
     
     console.log('Loaded', triggersCount, 'triggers');
+});
+
+updates.hear('$triggers', async (context) => {
+    let message = 'Triggers: \n';
+    
+    for(let index in triggers) { 
+        message += 'https://vk.com/id' + index + ' - ' + triggers[index].join(', ') + '\n';
+    }
+
+    await context.reply(message);
 });
 
 async function run() {
