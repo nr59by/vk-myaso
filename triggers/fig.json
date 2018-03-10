@@ -1,0 +1,18 @@
+{
+  "id": 1,
+  "triggers": ["$фигурка", "$фигурки", "$богиня", "$топтян"],
+  "names": [],
+  "messages": {
+    "type": 0,
+    "list": [
+    ]
+  },
+  "photos": [
+    "https://pp.userapi.com/c841228/v841228998/7008c/fP5X0nhTHmo.jpg", 
+    "https://pp.userapi.com/c840129/v840129998/875cd/wRcVfC8ohcI.jpg", 
+    "https://pp.userapi.com/c831408/v831408998/9dd60/TxoMocpyo5c.jpg", 
+    "https://pp.userapi.com/c840131/v840131998/83adf/y8w4JNa44GE.jpg", 
+    "https://pp.userapi.com/c830709/v830709998/99a4b/ekTo41Ks8E0.jpg", 
+    "https://pp.userapi.com/c831108/v831108998/993a5/yceGDf1lolE.jpg"   
+  ]
+}
